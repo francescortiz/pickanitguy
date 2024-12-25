@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { AuthSession, SupabaseClient } from '@supabase/supabase-js';
 	import type { Database } from './database.types';
-	import WheelBox2d from './WheelBox2d.svelte';
+	import WheelRapier from './wheel/WheelRapier.svelte';
 
 	type AccountProps = {
 		session: AuthSession;
@@ -113,5 +113,5 @@
 			Sign Out
 		</button>
 	</form>
-	<WheelBox2d session={session} appSupabase={appSupabase}></WheelBox2d>
+	<WheelRapier session={session} appSupabase={appSupabase}></WheelRapier>
 </div>

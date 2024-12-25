@@ -1,6 +1,18 @@
+<!--
+This is not used because I haven't been able to make joints that are not elastic.
+
+Advantages of this solution:
+- A box falling in the ground just stops. (Rapier makes it bounce a bit).
+- Better performance in Safari.
+
+Disadvantages:
+- Lack of jsdoc.
+- Development is harder.
+
+-->
 <script lang="ts">
 	import type { AuthSession, SupabaseClient } from '@supabase/supabase-js';
-	import type { Database } from './database.types';
+	import type { Database } from '../database.types';
 	/**
 	 * importing from 'box2d-wasm' like this requires you to have
 	 * {
@@ -11,7 +23,7 @@
 	 * in your tsconfig.json
 	 */
 	import Box2DFactory from 'box2d-wasm';
-	import { makeDebugDraw } from './debugDraw';
+	import { makeDebugDraw } from '../debugDraw';
 
 	type WheelBox2dProps = {
 		session: AuthSession;
