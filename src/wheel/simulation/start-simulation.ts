@@ -17,7 +17,7 @@ export const startSimulation = ({
 	const sceneHeight = 700;
 	const centerX = sceneWidth / 2;
 	const centerY = sceneHeight / 2;
-	const renderScale = 40;
+	const renderScale = 120;
 	let runSimulation = true;
 
 	/**
@@ -44,7 +44,15 @@ export const startSimulation = ({
 	createWheel({ world });
 
 	const ground = makeCuboid({ world, x: 0, y: -5, w: 20, h: 1, type: RigidBodyType.Fixed });
-	const box = makeCuboid({ world, x: 0, y: 10, w: 1, h: 1, type: RigidBodyType.Dynamic });
+	const box = makeCuboid({
+		world,
+		x: 0,
+		y: 10,
+		w: 1,
+		h: 1,
+		type: RigidBodyType.Dynamic,
+		continuousCollisionDetection: true,
+	});
 
 	let lines = new Graphics();
 	viewport.addChild(lines);
@@ -71,7 +79,7 @@ export const startSimulation = ({
 					centerX + vertices[i + 2] * renderScale,
 					centerY + -vertices[i + 3] * renderScale,
 				)
-				.stroke({ color: c, width: Math.max(1, 0.05 * renderScale) });
+				.stroke({ color: c, width: 2 });
 		}
 	}
 

@@ -23,6 +23,8 @@ export const makeCuboid = ({
 	w,
 	h,
 	type,
+	density = DEFAULT_DENSITY,
+	continuousCollisionDetection = false,
 }: {
 	world: World;
 	x: number;
@@ -30,13 +32,20 @@ export const makeCuboid = ({
 	w: number;
 	h: number;
 	type: RigidBodyType;
+	density?: number;
+	continuousCollisionDetection?: boolean;
 }): Body => {
-	const rigidBodyDesc = new RigidBodyDesc(type).setTranslation(x, y);
+	const rigidBodyDesc = new RigidBodyDesc(type)
+		.setTranslation(x, y)
+		.setCcdEnabled(continuousCollisionDetection);
+
 	const rigidBody = world.createRigidBody(rigidBodyDesc);
 
 	const colliderDesc = ColliderDesc.cuboid(w / 2, h / 2)
 		.setRestitution(0.0)
-		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
+		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
+		.setDensity(density);
+
 	const collider = world.createCollider(colliderDesc, rigidBody);
 
 	return {
@@ -52,6 +61,7 @@ export const makeBall = ({
 	r,
 	type,
 	density = DEFAULT_DENSITY,
+	continuousCollisionDetection = false,
 }: {
 	world: World;
 	x: number;
@@ -59,8 +69,12 @@ export const makeBall = ({
 	r: number;
 	type: RigidBodyType;
 	density?: number;
+	continuousCollisionDetection?: boolean;
 }): Body => {
-	const rigidBodyDesc = new RigidBodyDesc(type).setTranslation(x, y);
+	const rigidBodyDesc = new RigidBodyDesc(type)
+		.setTranslation(x, y)
+		.setCcdEnabled(continuousCollisionDetection);
+
 	const rigidBody = world.createRigidBody(rigidBodyDesc);
 
 	const colliderDesc = ColliderDesc.ball(r)
@@ -77,26 +91,13 @@ export const makeBall = ({
 };
 
 export const createWheel = ({ world }: { world: World }) => {
-	const pegCount = 12;
-	const pegRadius = 0.05;
+	const pegCount = 72;
+	const pegRadius = 0.015;
 	const wheelRadius = 1.5;
 	const pegOffset = wheelRadius - pegRadius * 2;
 
 	const base = makeCuboid({ world, x: 0, y: -2, w: 0.5, h: 0.5, type: RigidBodyType.Fixed });
 	const wheel = makeBall({ world, x: 0, y: 0, r: 1.5, type: RigidBodyType.Dynamic, density: 10 });
-
-	wheel.rigidBody.addTorque(-300, true);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-		wheel.rigidBody.addTorque(-500, true);
-	}, 500);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-		wheel.rigidBody.addTorque(-300, true);
-	}, 1000);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-	}, 1500);
 
 	const wheelJoint = world.createImpulseJoint(
 		JointData.revolute({ x: 0.0, y: 0.0 }, { x: 0.0, y: +2.0 }),
@@ -104,6 +105,22 @@ export const createWheel = ({ world }: { world: World }) => {
 		base.rigidBody,
 		true,
 	);
+
+	const armStrength = 100;
+	const weakPullPushRatio = 3 / 5;
+
+	wheel.rigidBody.addTorque(-armStrength * weakPullPushRatio, true);
+	setTimeout(() => {
+		wheel.rigidBody.resetTorques(true);
+		wheel.rigidBody.addTorque(-armStrength, true);
+	}, 500);
+	setTimeout(() => {
+		wheel.rigidBody.resetTorques(true);
+		wheel.rigidBody.addTorque(-armStrength * weakPullPushRatio, true);
+	}, 1000);
+	setTimeout(() => {
+		wheel.rigidBody.resetTorques(true);
+	}, 1500);
 
 	for (let pegIndex = 0; pegIndex < pegCount; pegIndex++) {
 		const pegAngle = pegIndex * ((Math.PI * 2) / pegCount);
@@ -116,6 +133,7 @@ export const createWheel = ({ world }: { world: World }) => {
 			y: pegY,
 			r: pegRadius,
 			type: RigidBodyType.Dynamic,
+			continuousCollisionDetection: true,
 		});
 
 		const pegJoint = world.createImpulseJoint(
