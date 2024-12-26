@@ -1,5 +1,5 @@
 import { Application } from 'pixi.js';
-import { startSimulation } from './simulation';
+import { startSimulation } from './simulation/start-simulation';
 
 export const bootstrapWheel = (
 	canvas: HTMLCanvasElement,

@@ -1,7 +1,7 @@
 import { Application, Color, Graphics } from 'pixi.js';
-import * as RAPIER from '@dimforge/rapier2d';
-import { ColliderDesc, RigidBodyDesc, World } from '@dimforge/rapier2d';
+import { RigidBodyType, World } from '@dimforge/rapier2d';
 import { Viewport } from 'pixi-viewport';
+import { createWheel, makeCuboid } from './lib';
 
 export const startSimulation = ({
 	pixiApp,
@@ -18,7 +18,6 @@ export const startSimulation = ({
 	const centerX = sceneWidth / 2;
 	const centerY = sceneHeight / 2;
 	const renderScale = 40;
-	const meters = 1;
 	let runSimulation = true;
 
 	/**
@@ -42,25 +41,10 @@ export const startSimulation = ({
 	 * Physics stuff
 	 */
 
-	// Create the ground
-	// Create a dynamic rigid-body.
-	const groundDesc = RigidBodyDesc.fixed().setTranslation(0.0 * meters, -5.0 * meters);
-	const ground = world.createRigidBody(groundDesc);
+	createWheel({ world });
 
-	const groundColliderDesc = ColliderDesc.cuboid(10.0 * meters, 0.5 * meters)
-		.setRestitution(0.0)
-		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-	const groundCollider = world.createCollider(groundColliderDesc, ground);
-
-	// Create a dynamic rigid-body.
-	const boxDesc = RigidBodyDesc.dynamic().setTranslation(0.0 * meters, 10.0 * meters);
-	const box = world.createRigidBody(boxDesc);
-
-	// Create a cuboid collider attached to the dynamic rigidBody.
-	const boxColliderDesc = ColliderDesc.cuboid(0.5 * meters, 0.5 * meters)
-		.setRestitution(0.0)
-		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min);
-	const boxCollider = world.createCollider(boxColliderDesc, box);
+	const ground = makeCuboid({ world, x: 0, y: -5, w: 20, h: 1, type: RigidBodyType.Fixed });
+	const box = makeCuboid({ world, x: 0, y: 10, w: 1, h: 1, type: RigidBodyType.Dynamic });
 
 	let lines = new Graphics();
 	viewport.addChild(lines);
@@ -87,7 +71,7 @@ export const startSimulation = ({
 					centerX + vertices[i + 2] * renderScale,
 					centerY + -vertices[i + 3] * renderScale,
 				)
-				.stroke({ color: c, width: Math.max(1, 0.1 * renderScale) });
+				.stroke({ color: c, width: Math.max(1, 0.05 * renderScale) });
 		}
 	}
 
@@ -102,7 +86,7 @@ export const startSimulation = ({
 		world.step();
 
 		// Get and print the rigid-body's position.
-		let position = box.translation();
+		let position = box.rigidBody.translation();
 		console.log('Rigid-body position: ', position.x, ',', position.y);
 
 		renderDebug(viewport, world);

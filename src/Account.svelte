@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { AuthSession, SupabaseClient } from '@supabase/supabase-js';
 	import type { Database } from './database.types';
-	import WheelRapier from './wheel/WheelRapier.svelte';
+	import Wheel from './wheel/Wheel.svelte';
 
 	type AccountProps = {
 		session: AuthSession;
@@ -12,8 +12,7 @@
 
 	let loading: boolean = $state(true);
 	let username: string | null = $state(null);
-	let website: string | null = $state(null);
-	let avatar: string | null = $state(null);
+	let avatarUrl: string | null = $state(null);
 
 	$effect(() => {
 		getProfile();
@@ -26,7 +25,7 @@
 
 			// const { data, error, status } = await supabase
 			//   .from("profiles")
-			//   .select(`username, website, avatar_url`)
+			//   .select(`username, avatar_url`)
 			//   .eq("id", user.id)
 			//   .single();
 			//
@@ -35,9 +34,8 @@
 			// }
 			//
 			// if (data) {
-			//   setUsername(data.username);
-			//   setWebsite(data.website);
-			//   setAvatarUrl(data.avatar_url);
+			//   username = data.username;
+			//   avatarUrl = data.avatar_url;
 			// }
 		} catch (error) {
 			if (error instanceof Error) {
@@ -58,7 +56,6 @@
 			// const updates = {
 			// 	id: user.id,
 			// 	username: username,
-			// 	website: website,
 			// 	avatar_url: avatarUrl,
 			// 	updated_at: new Date().toISOString(),
 			// };
@@ -113,5 +110,5 @@
 			Sign Out
 		</button>
 	</form>
-	<WheelRapier session={session} appSupabase={appSupabase}></WheelRapier>
+	<Wheel></Wheel>
 </div>
