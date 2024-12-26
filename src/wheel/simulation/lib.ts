@@ -113,14 +113,14 @@ export const createWheel = ({ world }: { world: World }) => {
 	setTimeout(() => {
 		wheel.rigidBody.resetTorques(true);
 		wheel.rigidBody.addTorque(-armStrength, true);
-	}, 500);
+	}, 400);
 	setTimeout(() => {
 		wheel.rigidBody.resetTorques(true);
 		wheel.rigidBody.addTorque(-armStrength * weakPullPushRatio, true);
-	}, 1000);
+	}, 800);
 	setTimeout(() => {
 		wheel.rigidBody.resetTorques(true);
-	}, 1500);
+	}, 1200);
 
 	for (let pegIndex = 0; pegIndex < pegCount; pegIndex++) {
 		const pegAngle = pegIndex * ((Math.PI * 2) / pegCount);
