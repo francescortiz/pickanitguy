@@ -10,6 +10,7 @@ export const startSimulation = ({
 	pixiApp: Application;
 }): {
 	shutdownSimulation: () => void;
+	spin: () => void;
 } => {
 	let gravity = { x: 0.0, y: -9.81 };
 	let world = new World(gravity);
@@ -66,5 +67,6 @@ export const startSimulation = ({
 			runSimulation = false;
 			destroyRenderDebug();
 		},
+		spin: () => wheelScene.spin(),
 	};
 };

@@ -5,12 +5,14 @@ export const bootstrapWheel = (
 	canvas: HTMLCanvasElement,
 ): {
 	shutdown: () => void;
+	spin: () => void;
 } => {
 	let runPixiApp = true;
 
 	const pixiApp: Application = new Application();
 
 	let shutdownSimulation: () => void | undefined;
+	let spin = () => {};
 
 	pixiApp
 		.init({
@@ -27,7 +29,7 @@ export const bootstrapWheel = (
 				return;
 			}
 
-			({ shutdownSimulation } = startSimulation({ pixiApp }));
+			({ shutdownSimulation, spin } = startSimulation({ pixiApp }));
 		});
 
 	return {
@@ -37,6 +39,11 @@ export const bootstrapWheel = (
 				shutdownSimulation();
 			}
 			pixiApp.destroy();
+		},
+		spin: () => {
+			if (spin) {
+				spin();
+			}
 		},
 	};
 };

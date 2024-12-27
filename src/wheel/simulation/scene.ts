@@ -1,4 +1,4 @@
-import { JointData, RigidBodyType, type World } from '@dimforge/rapier2d';
+import { JointData, RevoluteImpulseJoint, RigidBodyType, type World } from '@dimforge/rapier2d';
 import { type Body, makeBall, makeConvexMesh, makeCuboid } from './lib';
 
 export const createWheelScene = ({
@@ -13,6 +13,7 @@ export const createWheelScene = ({
 	sceneTick: () => {
 		winner: number | null;
 	};
+	spin: () => void;
 } => {
 	const pegRadius = 0.03;
 	const wheelRadius = 1.5;
@@ -34,25 +35,14 @@ export const createWheelScene = ({
 		colliderGroups: 0,
 	});
 
-	const wheelJoint = world.createImpulseJoint(
+	const wheelJoint: RevoluteImpulseJoint = world.createImpulseJoint(
 		JointData.revolute({ x: 0.0, y: 0.0 }, { x: 0.0, y: 0.0 }),
 		wheel.rigidBody,
 		wheelBase.rigidBody,
 		true,
-	);
+	) as RevoluteImpulseJoint;
 
-	wheel.rigidBody.addTorque(-armStrength * armWeakPullPushRatio, true);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-		wheel.rigidBody.addTorque(-armStrength, true);
-	}, 400);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-		wheel.rigidBody.addTorque(-armStrength * armWeakPullPushRatio, true);
-	}, 800);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-	}, 1200);
+	wheelJoint.configureMotorVelocity(1, 0.2);
 
 	const pegs: Array<Body> = [];
 	for (let pegIndex = 0; pegIndex < pegCount; pegIndex++) {
@@ -154,6 +144,22 @@ export const createWheelScene = ({
 					winner: pegIndex,
 				};
 			}
+		},
+		spin: () => {
+			wheelJoint.configureMotorVelocity(0, 0.00000001);
+
+			wheel.rigidBody.addTorque(-armStrength * armWeakPullPushRatio, true);
+			setTimeout(() => {
+				wheel.rigidBody.resetTorques(true);
+				wheel.rigidBody.addTorque(-armStrength, true);
+			}, 400);
+			setTimeout(() => {
+				wheel.rigidBody.resetTorques(true);
+				wheel.rigidBody.addTorque(-armStrength * armWeakPullPushRatio, true);
+			}, 800);
+			setTimeout(() => {
+				wheel.rigidBody.resetTorques(true);
+			}, 1200);
 		},
 	};
 };
