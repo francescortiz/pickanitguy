@@ -137,7 +137,7 @@ export const createWheelScene = ({
 
 			needle.rigidBody.applyTorqueImpulse(needleImpulseNormalized, true);
 
-			if (wheel.rigidBody.isMoving()) {
+			if (!wheel.rigidBody.isSleeping()) {
 				return { winner: null };
 			} else {
 				console.log();
