@@ -1,26 +1,27 @@
 import { JointData, RigidBodyType, type World } from '@dimforge/rapier2d';
-import { type Body, makeBall, makeConvexMesh } from './lib';
+import { type Body, makeBall, makeConvexMesh, makeCuboid } from './lib';
 
 export const createWheelScene = ({
 	world,
+	pegCount,
 }: {
 	world: World;
+	pegCount: number;
 }): {
 	wheel: Body;
 	pegs: Array<Body>;
 	sceneTick: () => {
-		winner: number;
+		winner: number | null;
 	};
 } => {
-	const pegCount = 36;
 	const pegRadius = 0.03;
 	const wheelRadius = 1.5;
 	const pegOffset = wheelRadius - pegRadius;
 
-	const armStrength = 10;
+	const armStrength = Math.random() * 10 + 7;
 	const armWeakPullPushRatio = 3 / 5;
 
-	const needleSpringHandleY = 0.15;
+	const needleOffset = 0.19;
 
 	const wheelBase = makeBall({ world, x: 0, y: 0, r: 0.2, type: RigidBodyType.Fixed });
 	const wheel = makeBall({
@@ -82,18 +83,42 @@ export const createWheelScene = ({
 		x: 0,
 		y: 0,
 		type: RigidBodyType.Dynamic,
-		vertices: new Float32Array([0, 0.15, 0.06, 0, 0, -0.4, -0.05, 0]),
+		vertices: new Float32Array(
+			[
+				[0, 0.15], // Top
+				[0.06, 0], // Right
+				[0.001, -0.4], // Bottom right
+				[-0.001, -0.4], // Bottom left
+				[-0.06, 0], // Left
+			].flatMap((x) => x),
+		),
 		density: 5,
-		friction: 0.2,
+		friction: 0.1,
 	});
-	needle.rigidBody.setRotation(0.9, true);
+	needle.rigidBody.setRotation(0.3, true);
 	const needleBase = makeBall({
 		world,
 		x: 0,
-		y: wheelRadius + 0.2,
+		y: wheelRadius + needleOffset,
 		r: 0.01,
 		type: RigidBodyType.Fixed,
 		colliderGroups: 0b0,
+	});
+	const needleRightStop = makeCuboid({
+		world,
+		x: 0.35,
+		y: wheelRadius + needleOffset + 0.01,
+		w: 0.2,
+		h: 0.2,
+		type: RigidBodyType.Fixed,
+	});
+	const needleLeftStop = makeCuboid({
+		world,
+		x: -0.35,
+		y: wheelRadius + needleOffset + 0.01,
+		w: 0.2,
+		h: 0.2,
+		type: RigidBodyType.Fixed,
 	});
 
 	const needleJoint = world.createImpulseJoint(
@@ -107,21 +132,28 @@ export const createWheelScene = ({
 		wheel,
 		pegs,
 		sceneTick: () => {
-			console.log(`needle rotation = ${needle.rigidBody.rotation()}`);
-			// if (needle.rigidBody.rotation() > maxNeededRotation) {
-			// 	needle.rigidBody.setRotation(maxNeededRotation, true);
-			// }
-			// if (needle.rigidBody.rotation() < minNeededRotation) {
-			// 	needle.rigidBody.setRotation(minNeededRotation, true);
-			// }
+			const needleImpulse = -needle.rigidBody.rotation() * 0.001;
+			const needleImpulseNormalized = Math.abs(needleImpulse) > 0.0001 ? needleImpulse : 0;
 
-			needle.rigidBody.applyTorqueImpulse(-needle.rigidBody.rotation() * 0.001, true);
+			needle.rigidBody.applyTorqueImpulse(needleImpulseNormalized, true);
 
-			const pegIndex = Math.floor(wheel.rigidBody.rotation() / pegCount);
+			if (wheel.rigidBody.isMoving()) {
+				return { winner: null };
+			} else {
+				console.log();
+				let rotation = wheel.rigidBody.rotation();
+				while (rotation < 0) {
+					rotation += Math.PI * 2;
+				}
+				while (rotation >= Math.PI * 2) {
+					rotation -= Math.PI * 2;
+				}
+				const pegIndex = Math.floor((rotation / (Math.PI * 2)) * pegCount);
 
-			return {
-				winner: pegIndex,
-			};
+				return {
+					winner: pegIndex,
+				};
+			}
 		},
 	};
 };
