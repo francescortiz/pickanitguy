@@ -2,19 +2,20 @@ import * as RAPIER from '@dimforge/rapier2d';
 import {
 	Collider,
 	ColliderDesc,
-	JointData,
 	RigidBody,
 	RigidBodyDesc,
 	RigidBodyType,
 	type World,
 } from '@dimforge/rapier2d';
 
-type Body = {
+export type Body = {
 	rigidBody: RigidBody;
 	collider: Collider;
 };
 
 const DEFAULT_DENSITY = 1.0;
+const DEFAULT_COLLIDER_GROUPS = 0xffff_ffff;
+const DEFAULT_FRICTION = 0.5;
 
 export const makeCuboid = ({
 	world,
@@ -25,6 +26,8 @@ export const makeCuboid = ({
 	type,
 	density = DEFAULT_DENSITY,
 	continuousCollisionDetection = false,
+	colliderGroups = DEFAULT_COLLIDER_GROUPS,
+	friction = DEFAULT_FRICTION,
 }: {
 	world: World;
 	x: number;
@@ -34,6 +37,8 @@ export const makeCuboid = ({
 	type: RigidBodyType;
 	density?: number;
 	continuousCollisionDetection?: boolean;
+	colliderGroups?: number;
+	friction?: number;
 }): Body => {
 	const rigidBodyDesc = new RigidBodyDesc(type)
 		.setTranslation(x, y)
@@ -44,7 +49,9 @@ export const makeCuboid = ({
 	const colliderDesc = ColliderDesc.cuboid(w / 2, h / 2)
 		.setRestitution(0.0)
 		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
-		.setDensity(density);
+		.setDensity(density)
+		.setCollisionGroups(colliderGroups)
+		.setFriction(friction);
 
 	const collider = world.createCollider(colliderDesc, rigidBody);
 
@@ -62,6 +69,8 @@ export const makeBall = ({
 	type,
 	density = DEFAULT_DENSITY,
 	continuousCollisionDetection = false,
+	colliderGroups = DEFAULT_COLLIDER_GROUPS,
+	friction = DEFAULT_FRICTION,
 }: {
 	world: World;
 	x: number;
@@ -70,6 +79,8 @@ export const makeBall = ({
 	type: RigidBodyType;
 	density?: number;
 	continuousCollisionDetection?: boolean;
+	colliderGroups?: number;
+	friction?: number;
 }): Body => {
 	const rigidBodyDesc = new RigidBodyDesc(type)
 		.setTranslation(x, y)
@@ -80,7 +91,9 @@ export const makeBall = ({
 	const colliderDesc = ColliderDesc.ball(r)
 		.setRestitution(0.0)
 		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
-		.setDensity(density);
+		.setDensity(density)
+		.setCollisionGroups(colliderGroups)
+		.setFriction(friction);
 
 	const collider = world.createCollider(colliderDesc, rigidBody);
 
@@ -90,57 +103,44 @@ export const makeBall = ({
 	};
 };
 
-export const createWheel = ({ world }: { world: World }) => {
-	const pegCount = 72;
-	const pegRadius = 0.015;
-	const wheelRadius = 1.5;
-	const pegOffset = wheelRadius - pegRadius * 2;
+export const makeConvexMesh = ({
+	world,
+	x,
+	y,
+	vertices,
+	type,
+	density = DEFAULT_DENSITY,
+	continuousCollisionDetection = false,
+	colliderGroups = DEFAULT_COLLIDER_GROUPS,
+	friction = DEFAULT_FRICTION,
+}: {
+	world: World;
+	type: RigidBodyType;
+	x: number;
+	y: number;
+	vertices: Float32Array;
+	density?: number;
+	continuousCollisionDetection?: boolean;
+	colliderGroups?: number;
+	friction?: number;
+}): Body => {
+	const rigidBodyDesc = new RigidBodyDesc(type)
+		.setTranslation(x, y)
+		.setCcdEnabled(continuousCollisionDetection);
 
-	const base = makeCuboid({ world, x: 0, y: -2, w: 0.5, h: 0.5, type: RigidBodyType.Fixed });
-	const wheel = makeBall({ world, x: 0, y: 0, r: 1.5, type: RigidBodyType.Dynamic, density: 10 });
+	const rigidBody = world.createRigidBody(rigidBodyDesc);
 
-	const wheelJoint = world.createImpulseJoint(
-		JointData.revolute({ x: 0.0, y: 0.0 }, { x: 0.0, y: +2.0 }),
-		wheel.rigidBody,
-		base.rigidBody,
-		true,
-	);
+	const colliderDesc = ColliderDesc.convexPolyline(vertices)!
+		.setRestitution(0.0)
+		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
+		.setDensity(density)
+		.setCollisionGroups(colliderGroups)
+		.setFriction(friction);
 
-	const armStrength = 100;
-	const weakPullPushRatio = 3 / 5;
+	const collider = world.createCollider(colliderDesc, rigidBody);
 
-	wheel.rigidBody.addTorque(-armStrength * weakPullPushRatio, true);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-		wheel.rigidBody.addTorque(-armStrength, true);
-	}, 400);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-		wheel.rigidBody.addTorque(-armStrength * weakPullPushRatio, true);
-	}, 800);
-	setTimeout(() => {
-		wheel.rigidBody.resetTorques(true);
-	}, 1200);
-
-	for (let pegIndex = 0; pegIndex < pegCount; pegIndex++) {
-		const pegAngle = pegIndex * ((Math.PI * 2) / pegCount);
-		const pegX = Math.cos(pegAngle) * pegOffset;
-		const pegY = Math.sin(pegAngle) * pegOffset;
-
-		const peg = makeBall({
-			world,
-			x: pegX,
-			y: pegY,
-			r: pegRadius,
-			type: RigidBodyType.Dynamic,
-			continuousCollisionDetection: true,
-		});
-
-		const pegJoint = world.createImpulseJoint(
-			JointData.fixed({ x: pegX, y: pegY }, 0, { x: 0.0, y: 0.0 }, 0),
-			wheel.rigidBody,
-			peg.rigidBody,
-			true,
-		);
-	}
+	return {
+		rigidBody,
+		collider,
+	};
 };

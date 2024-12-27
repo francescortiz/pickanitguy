@@ -13,4 +13,4 @@
 	});
 </script>
 
-<canvas bind:this={canvas} id="demo-canvas" width="800" height="700"></canvas>
+<canvas bind:this={canvas} width="800" height="600"></canvas>

@@ -1,7 +1,7 @@
 import { Application, Color, Graphics } from 'pixi.js';
-import { RigidBodyType, World } from '@dimforge/rapier2d';
+import { World } from '@dimforge/rapier2d';
 import { Viewport } from 'pixi-viewport';
-import { createWheel, makeCuboid } from './lib';
+import { createWheelScene } from './scene';
 
 export const startSimulation = ({
 	pixiApp,
@@ -14,10 +14,10 @@ export const startSimulation = ({
 	let world = new World(gravity);
 
 	const sceneWidth = 800;
-	const sceneHeight = 700;
+	const sceneHeight = 600;
 	const centerX = sceneWidth / 2;
 	const centerY = sceneHeight / 2;
-	const renderScale = 120;
+	const renderScale = 150;
 	let runSimulation = true;
 
 	/**
@@ -41,18 +41,7 @@ export const startSimulation = ({
 	 * Physics stuff
 	 */
 
-	createWheel({ world });
-
-	const ground = makeCuboid({ world, x: 0, y: -5, w: 20, h: 1, type: RigidBodyType.Fixed });
-	const box = makeCuboid({
-		world,
-		x: 0,
-		y: 10,
-		w: 1,
-		h: 1,
-		type: RigidBodyType.Dynamic,
-		continuousCollisionDetection: true,
-	});
+	const wheelScene = createWheelScene({ world });
 
 	let lines = new Graphics();
 	viewport.addChild(lines);
@@ -93,9 +82,7 @@ export const startSimulation = ({
 		// Ste the simulation forward.
 		world.step();
 
-		// Get and print the rigid-body's position.
-		let position = box.rigidBody.translation();
-		console.log('Rigid-body position: ', position.x, ',', position.y);
+		wheelScene.sceneTick();
 
 		renderDebug(viewport, world);
 
