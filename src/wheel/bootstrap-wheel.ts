@@ -32,6 +32,9 @@ export const bootstrapWheel = (
 			({ shutdownSimulation, spin } = startSimulation({ pixiApp }));
 		});
 
+	// @ts-ignore Let's enable pixi dev tools
+	globalThis.__PIXI_APP__ = pixiApp;
+
 	return {
 		shutdown: () => {
 			runPixiApp = false;
