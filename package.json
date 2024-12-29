@@ -40,7 +40,6 @@
 		"@tailwindcss/container-queries": "0.1.1",
 		"@tailwindcss/forms": "0.5.9",
 		"@tailwindcss/typography": "0.5.15",
-		"box2d-wasm": "7.0.0",
 		"pixi-viewport": "6.0.3",
 		"pixi.js": "8.6.5"
 	}
