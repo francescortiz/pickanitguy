@@ -42,7 +42,7 @@ export const createWheelScene = ({
 		true,
 	) as RevoluteImpulseJoint;
 
-	wheelJoint.configureMotorVelocity(1, 0.2);
+	wheelJoint.configureMotorVelocity(0.5, 0.2);
 
 	const pegs: Array<Body> = [];
 	for (let pegIndex = 0; pegIndex < pegCount; pegIndex++) {
