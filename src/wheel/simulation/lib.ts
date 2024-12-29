@@ -1,5 +1,5 @@
-import * as RAPIER from '@dimforge/rapier2d';
 import {
+	CoefficientCombineRule,
 	Collider,
 	ColliderDesc,
 	RigidBody,
@@ -48,7 +48,7 @@ export const makeCuboid = ({
 
 	const colliderDesc = ColliderDesc.cuboid(w / 2, h / 2)
 		.setRestitution(0.0)
-		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
+		.setRestitutionCombineRule(CoefficientCombineRule.Min)
 		.setDensity(density)
 		.setCollisionGroups(colliderGroups)
 		.setFriction(friction);
@@ -90,7 +90,7 @@ export const makeBall = ({
 
 	const colliderDesc = ColliderDesc.ball(r)
 		.setRestitution(0.0)
-		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
+		.setRestitutionCombineRule(CoefficientCombineRule.Min)
 		.setDensity(density)
 		.setCollisionGroups(colliderGroups)
 		.setFriction(friction);
@@ -132,7 +132,7 @@ export const makeConvexMesh = ({
 
 	const colliderDesc = ColliderDesc.convexPolyline(vertices)!
 		.setRestitution(0.0)
-		.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
+		.setRestitutionCombineRule(CoefficientCombineRule.Min)
 		.setDensity(density)
 		.setCollisionGroups(colliderGroups)
 		.setFriction(friction);
