@@ -9,5 +9,12 @@ export default defineConfig({
 	},
 	build: {
 		target: 'esnext',
+		rollupOptions: {
+			/**
+			 * We need to remove tree shaking or else the build does not include the code to
+			 * initialise the rapier wasm: https://github.com/dimforge/rapier.js/issues/278
+			 */
+			treeshake: false,
+		},
 	},
 });
