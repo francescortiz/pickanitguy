@@ -4,6 +4,8 @@ import { Viewport } from 'pixi-viewport';
 import { createWheelScene } from './scene';
 import { destroyRenderDebug, renderDebug } from './render-debug';
 
+export const FRAME_DURATION_MS: number = Math.round(1000 / 120);
+
 export const startSimulation = ({
 	pixiApp,
 }: {
@@ -57,7 +59,7 @@ export const startSimulation = ({
 
 		renderDebug(viewport, world);
 
-		requestAnimationFrame(gameLoop);
+		setTimeout(gameLoop, FRAME_DURATION_MS);
 	};
 
 	gameLoop();
