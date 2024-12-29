@@ -118,6 +118,8 @@ export const createWheelScene = ({
 		true,
 	);
 
+	let alreadySpinned = false;
+
 	return {
 		wheel,
 		pegs,
@@ -146,6 +148,11 @@ export const createWheelScene = ({
 			}
 		},
 		spin: () => {
+			if (alreadySpinned) {
+				return;
+			}
+			alreadySpinned = true;
+
 			wheelJoint.configureMotorVelocity(0, 0.00000001);
 
 			wheel.rigidBody.addTorque(-armStrength * armWeakPullPushRatio, true);
