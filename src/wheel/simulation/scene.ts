@@ -1,5 +1,6 @@
 import { JointData, RevoluteImpulseJoint, RigidBodyType, type World } from '@dimforge/rapier2d';
 import { type Body, makeBall, makeConvexMesh, makeCuboid } from './lib';
+import { WHEEL_CONSTANTS } from './constants';
 
 export const createWheelScene = ({
 	world,
@@ -15,11 +16,10 @@ export const createWheelScene = ({
 	};
 	spin: () => void;
 } => {
-	const pegRadius = 0.03;
-	const wheelRadius = 1.5;
+	const { pegRadius, wheelRadius, strengthLoop1, strengthLoop2 } = WHEEL_CONSTANTS;
 	const pegOffset = wheelRadius - pegRadius;
 
-	const armStrength = Math.random() * 10 + 7;
+	const armStrength = (strengthLoop1 + Math.random() * strengthLoop2) * 2;
 	const armWeakPullPushRatio = 3 / 5;
 
 	const needleOffset = 0.19;
@@ -42,7 +42,7 @@ export const createWheelScene = ({
 		true,
 	) as RevoluteImpulseJoint;
 
-	wheelJoint.configureMotorVelocity(0.5, 0.2);
+	wheelJoint.configureMotorVelocity(0.4, 10000);
 
 	const pegs: Array<Body> = [];
 	for (let pegIndex = 0; pegIndex < pegCount; pegIndex++) {
@@ -120,31 +120,38 @@ export const createWheelScene = ({
 
 	let alreadySpinned = false;
 
+	const finish = () => {
+		console.log();
+		let rotation = wheel.rigidBody.rotation();
+		while (rotation < 0) {
+			rotation += Math.PI * 2;
+		}
+		while (rotation >= Math.PI * 2) {
+			rotation -= Math.PI * 2;
+		}
+		const pegIndex = Math.floor((rotation / (Math.PI * 2)) * pegCount);
+
+		return {
+			winner: pegIndex,
+		};
+	};
+
 	return {
 		wheel,
 		pegs,
 		sceneTick: () => {
-			const needleImpulse = -needle.rigidBody.rotation() * 0.001;
+			const needleImpulse = -needle.rigidBody.rotation() * 0.002;
 			const needleImpulseNormalized = Math.abs(needleImpulse) > 0.0001 ? needleImpulse : 0;
 
 			needle.rigidBody.applyTorqueImpulse(needleImpulseNormalized, true);
 
+			if (needle.rigidBody.rotation() <= 0) {
+				return finish();
+			}
 			if (!wheel.rigidBody.isSleeping()) {
 				return { winner: null };
 			} else {
-				console.log();
-				let rotation = wheel.rigidBody.rotation();
-				while (rotation < 0) {
-					rotation += Math.PI * 2;
-				}
-				while (rotation >= Math.PI * 2) {
-					rotation -= Math.PI * 2;
-				}
-				const pegIndex = Math.floor((rotation / (Math.PI * 2)) * pegCount);
-
-				return {
-					winner: pegIndex,
-				};
+				return finish();
 			}
 		},
 		spin: () => {
