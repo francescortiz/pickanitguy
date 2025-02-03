@@ -32,9 +32,9 @@
 	<header class="header">
 		<div class="container" style:padding="50px 0 100px 0">
 			{#if !session}
-				<Auth appSupabase={appSupabase} />
+				<Auth {appSupabase} />
 			{:else}
-				<Account appSupabase={appSupabase} session={session} />
+				<Account {appSupabase} {session} />
 			{/if}
 		</div>
 	</header>
