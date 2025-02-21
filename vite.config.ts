@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 import wasm from 'vite-plugin-wasm';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-	plugins: [wasm(), svelte()],
+	plugins: [wasm(), svelte(), tailwindcss()],
 	server: {
 		port: 3000,
 	},
