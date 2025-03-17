@@ -11,6 +11,7 @@ export const createWheelScene = ({
 }): {
 	wheel: Body;
 	pegs: Array<Body>;
+	needle: Body;
 	sceneTick: () => {
 		winner: number | null;
 	};
@@ -139,6 +140,7 @@ export const createWheelScene = ({
 	return {
 		wheel,
 		pegs,
+		needle,
 		sceneTick: () => {
 			const needleImpulse = -needle.rigidBody.rotation() * 0.002;
 			const needleImpulseNormalized = Math.abs(needleImpulse) > 0.0001 ? needleImpulse : 0;

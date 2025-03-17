@@ -6,6 +6,7 @@ export const bootstrapWheel = (
 ): {
 	shutdown: () => void;
 	spin: () => void;
+	toggleRenderMode: () => void;
 } => {
 	let runPixiApp = true;
 
@@ -13,10 +14,11 @@ export const bootstrapWheel = (
 
 	let shutdownSimulation: () => void | undefined;
 	let spin = () => {};
+	let toggleRenderMode = () => {};
 
 	pixiApp
 		.init({
-			// background: "#1099bb",
+			background: "#1a1a2e",
 			resizeTo: canvas,
 			canvas,
 		})
@@ -29,7 +31,7 @@ export const bootstrapWheel = (
 				return;
 			}
 
-			({ shutdownSimulation, spin } = startSimulation({ pixiApp }));
+			({ shutdownSimulation, spin, toggleRenderMode } = startSimulation({ pixiApp }));
 		});
 
 	// @ts-ignore Let's enable pixi dev tools
@@ -46,6 +48,11 @@ export const bootstrapWheel = (
 		spin: () => {
 			if (spin) {
 				spin();
+			}
+		},
+		toggleRenderMode: () => {
+			if (toggleRenderMode) {
+				toggleRenderMode();
 			}
 		},
 	};

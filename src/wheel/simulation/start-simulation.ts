@@ -3,6 +3,7 @@ import { World } from '@dimforge/rapier2d';
 import { Viewport } from 'pixi-viewport';
 import { createWheelScene } from './scene';
 import { destroyRenderDebug, renderDebug } from './render-debug';
+import { destroyBeautifulRender, renderBeautiful } from './render-beautiful';
 
 export const FRAME_DURATION_MS: number = Math.round(1000 / 120);
 
@@ -13,6 +14,7 @@ export const startSimulation = ({
 }): {
 	shutdownSimulation: () => void;
 	spin: () => void;
+	toggleRenderMode: () => void;
 } => {
 	let gravity = { x: 0.0, y: -9.81 };
 	let world = new World(gravity);
@@ -20,6 +22,7 @@ export const startSimulation = ({
 	const sceneWidth = 800;
 	const sceneHeight = 600;
 	let runSimulation = true;
+	let isDebugMode = true;
 
 	/**
 	 * Pixi stuff
@@ -47,7 +50,7 @@ export const startSimulation = ({
 			return;
 		}
 
-		// Ste the simulation forward.
+		// Step the simulation forward.
 		world.step();
 
 		({ winner } = wheelScene.sceneTick());
@@ -57,7 +60,11 @@ export const startSimulation = ({
 			runSimulation = false;
 		}
 
-		renderDebug(viewport, world);
+		if (isDebugMode) {
+			renderDebug(viewport, world);
+		} else {
+			renderBeautiful(viewport, world, wheelScene);
+		}
 
 		setTimeout(gameLoop, FRAME_DURATION_MS);
 	};
@@ -68,7 +75,16 @@ export const startSimulation = ({
 		shutdownSimulation: () => {
 			runSimulation = false;
 			destroyRenderDebug();
+			destroyBeautifulRender();
 		},
 		spin: () => wheelScene.spin(),
+		toggleRenderMode: () => {
+			isDebugMode = !isDebugMode;
+			if (isDebugMode) {
+				destroyBeautifulRender();
+			} else {
+				destroyRenderDebug();
+			}
+		}
 	};
 };
