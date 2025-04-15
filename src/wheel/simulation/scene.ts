@@ -155,9 +155,14 @@ export const createWheelScene = ({
 				}
 			}
 
-			// If the wheel has stopped completely, finish regardless of needle position
+			// If the wheel has stopped completely we might have to finish
 			if (wheel.rigidBody.isSleeping()) {
-				return finish();
+				// If the needle is not vertical, push the wheel back aiming for vertical needle
+				if (needle.rigidBody.rotation() > 0) {
+					wheel.rigidBody.addTorque(armStrength / 100, true);
+				} else {
+					return finish();
+				}
 			}
 
 			return { winner: null };
