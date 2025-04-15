@@ -147,14 +147,20 @@ export const createWheelScene = ({
 
 			needle.rigidBody.applyTorqueImpulse(needleImpulseNormalized, true);
 
+			// Check if the needle is vertical (rotation <= 0)
 			if (needle.rigidBody.rotation() <= 0) {
+				// Only finish if the wheel has stopped or is moving backwards
+				if (wheel.rigidBody.isSleeping() || wheel.rigidBody.angvel() > 0) {
+					return finish();
+				}
+			}
+
+			// If the wheel has stopped completely, finish regardless of needle position
+			if (wheel.rigidBody.isSleeping()) {
 				return finish();
 			}
-			if (!wheel.rigidBody.isSleeping()) {
-				return { winner: null };
-			} else {
-				return finish();
-			}
+
+			return { winner: null };
 		},
 		spin: () => {
 			if (alreadySpinned) {
